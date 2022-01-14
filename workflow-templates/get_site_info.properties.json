@@ -1,0 +1,13 @@
+{
+    "name": "Site Info",
+    "description": "Queries the Orchestrator server for info about the site",
+    "categories": [
+        "CI",
+        "Deployment",
+        "Hosting"
+    ],
+    "filePatterns": [
+        "package.json$",
+        ".*\\.md$"
+    ]
+}

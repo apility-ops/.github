@@ -1,0 +1,44 @@
+name: Get Site Information
+on:
+  workflow_call:
+    inputs:
+      url:
+        type: string
+        default: https://orc.apility.dev
+    outputs:
+      publicKey:
+        description: "Site public key"
+        value: ${{ jobs.site_info.outputs.publicKey }}
+      privateKey:
+        description: "Site private key"
+        value: ${{ jobs.site_info.outputs.privateKey }}
+      siteAlias:
+        description: "Site alias"
+        value ${{ jobs.site_info.outputs.siteAlias }}
+
+jobs:
+  site_info:
+    name: ""
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      publicKey: ${{ steps.info.publicKey }}
+      privateKey: ${{ steps.info.privateKey }}
+      siteAlias: ${{ steps.info.siteAlias }}
+    steps:
+    - uses: actions/checkout@master
+    - name: Create token
+      id: oidc
+      run: |
+        TOKEN=$(curl -sLS "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=orc.apility.dev" -H "User-Agent: actions/oidc-client" -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN")
+        echo "$TOKEN"
+        echo "::set-output name=token::$(echo $TOKEN | jq -r .value)"
+    - name: Get site info
+      id: info
+      run: |
+        curl -H "Authorization:Bearer $OIDC_TOKEN" -H "Accepts:application/github-output" $BASE_PATH/info
+      env:
+        OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        BASE_PATH: ${{ inputs.url }}
